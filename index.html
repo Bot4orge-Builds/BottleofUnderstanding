@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://obagrzjzsywrrrpoxhjc.supabase.co https://api.anthropic.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
 <title>Staffingly — Bottle of Understanding</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&family=Instrument+Sans:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap');
@@ -1883,7 +1884,7 @@ async function callAI(prompt){
       'anthropic-dangerous-direct-browser-access':'true'
     },
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
+      model:'claude-sonnet-4-6',
       max_tokens:2000,
       messages:[{role:'user',content:prompt}]
     })
