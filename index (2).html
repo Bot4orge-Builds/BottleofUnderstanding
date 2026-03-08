@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staffingly — Bottle of Understanding</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&family=Instrument+Sans:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap');
+
+:root {
+  --ink: #0e0c0a;
+  --paper: #faf7f2;
+  --paper2: #f3ede3;
+  --warm: #e8ddd0;
+  --gold: #c9a84c;
+  --gold2: #e6c76e;
+  --ember: #c0522a;
+  --sage: #4a6741;
+  --fog: #8c8680;
+  --fog2: #b0aba4;
+  --border: #d4cdc4;
+  --understood: #4a6741;
+  --confused: #c0522a;
+  --partial: #c9a84c;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Instrument Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.5;
+}
+
+/* ── SCREEN SYSTEM ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ══════════════════════════════════════
+   LANDING
+══════════════════════════════════════ */
+#screen-landing {
+  align-items: center; justify-content: center;
+  background: var(--ink);
+  position: relative; overflow: hidden;
+}
+#screen-landing::after {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.landing-center {
+  text-align: center;
+  position: relative; z-index: 1;
+  padding: 40px 24px;
+  max-width: 560px;
+}
+
+.bottle-glyph {
+  width: 64px; height: 64px;
+  margin: 0 auto 28px;
+  position: relative;
+}
+.bottle-glyph svg { width: 100%; height: 100%; }
+
+.landing-eyebrow {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+h1.landing-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--paper);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+h1.landing-title em {
+  color: var(--gold2);
+  font-style: italic;
+}
+
+.landing-sub {
+  font-size: 0.9rem;
+  color: var(--fog2);
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+
+.landing-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 20px;
+}
+.l-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 22px 18px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+.l-card:hover {
+  background: rgba(201,168,76,0.06);
+  border-color: rgba(201,168,76,0.3);
+  transform: translateY(-2px);
+}
+.l-card-icon { font-size: 1.4rem; margin-bottom: 10px; }
+.l-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.92rem;
+  color: var(--paper);
+  margin-bottom: 4px;
+}
+.l-card p { font-size: 0.75rem; color: var(--fog); line-height: 1.5; }
+
+.l-token-row {
+  grid-column: 1/-1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 16px;
+}
+.l-token-row p { font-size: 0.75rem; color: var(--fog); margin-bottom: 10px; }
+.l-token-input-row { display: flex; gap: 8px; }
+.l-token-input {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9px;
+  padding: 9px 14px;
+  color: var(--paper);
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.8rem;
+  outline: none;
+}
+.l-token-input:focus { border-color: rgba(201,168,76,0.4); }
+.l-token-input::placeholder { color: var(--fog); }
+.btn-enter {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn-enter:hover { background: var(--gold2); }
+
+/* ══════════════════════════════════════
+   SHARED NAV
+══════════════════════════════════════ */
+.top-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--ink);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  position: sticky; top: 0; z-index: 100;
+  flex-shrink: 0;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold2);
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+}
+.nav-logo span.sub {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--fog);
+  text-transform: uppercase;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  padding-left: 10px;
+}
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-pill {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.nav-pill.admin { color: var(--gold); border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.08); }
+.nav-pill.member { color: #7eb8f7; border-color: rgba(126,184,247,0.3); background: rgba(126,184,247,0.08); }
+
+/* ══════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════ */
+.btn {
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-gold { background: var(--gold); color: var(--ink); }
+.btn-gold:hover { background: var(--gold2); box-shadow: 0 4px 16px rgba(201,168,76,0.25); }
+.btn-ghost { background: transparent; color: var(--fog2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--fog); color: var(--ink); background: var(--warm); }
+.btn-danger { background: rgba(192,82,42,0.1); color: var(--ember); border: 1px solid rgba(192,82,42,0.2); }
+.btn-danger:hover { background: rgba(192,82,42,0.18); }
+.btn-sm { padding: 6px 12px; font-size: 0.75rem; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ══════════════════════════════════════
+   ADMIN SCREEN
+══════════════════════════════════════ */
+#screen-admin { background: var(--paper); flex-direction: column; }
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 57px);
+}
+
+.admin-sidebar {
+  background: var(--ink);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  padding: 24px 14px;
+  overflow-y: auto;
+}
+.sb-section { margin-bottom: 28px; }
+.sb-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fog);
+  margin-bottom: 8px;
+  padding: 0 10px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.85rem;
+  color: var(--fog2);
+  font-weight: 500;
+}
+.sb-item:hover, .sb-item.active {
+  background: rgba(255,255,255,0.05);
+  color: var(--paper);
+}
+.sb-item.active { color: var(--gold2); }
+.sb-item .si { font-size: 14px; width: 18px; text-align: center; }
+
+.admin-main {
+  overflow-y: auto;
+  padding: 36px 40px;
+  background: var(--paper);
+}
+.admin-main.hidden { display: none; }
+
+/* ══════════════════════════════════════
+   PANEL HEADERS
+══════════════════════════════════════ */
+.ph {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+}
+.ph-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+  letter-spacing: -0.02em;
+}
+.ph-sub { font-size: 0.8rem; color: var(--fog); line-height: 1.5; }
+
+/* ══════════════════════════════════════
+   IMPORT PANEL
+══════════════════════════════════════ */
+.import-box {
+  background: var(--paper2);
+  border: 1.5px dashed var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 14px;
+}
+.import-box:hover, .import-box.drag { border-color: var(--gold); background: rgba(201,168,76,0.03); }
+.import-box input { display: none; }
+.import-icon { font-size: 2rem; margin-bottom: 10px; }
+.import-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem; margin-bottom: 5px;
+}
+.import-box p { font-size: 0.78rem; color: var(--fog); line-height: 1.5; }
+
+.divider-or {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--fog); font-size: 0.75rem; margin: 14px 0;
+}
+.divider-or::before, .divider-or::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.paste-box {
+  width: 100%;
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 160px;
+  color: var(--ink);
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.paste-box:focus { border-color: var(--gold); }
+.paste-box::placeholder { color: var(--fog2); }
+
+.ai-working {
+  background: var(--ink);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 14px 0;
+  display: none; align-items: center; gap: 14px;
+  color: var(--paper);
+}
+.ai-working.on { display: flex; }
+.ai-orb {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(201,168,76,0.15);
+  border: 1.5px solid var(--gold);
+  flex-shrink: 0;
+  animation: orbpulse 1.8s ease-in-out infinite;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+@keyframes orbpulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+}
+.ai-working-text { font-size: 0.82rem; color: var(--fog2); }
+.ai-working-text strong { color: var(--gold2); font-family: 'Courier Prime', monospace; font-size: 0.75rem; }
+
+.result-note {
+  background: rgba(74,103,65,0.08);
+  border: 1px solid rgba(74,103,65,0.2);
+  border-radius: 9px;
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  color: var(--sage);
+  font-family: 'Courier Prime', monospace;
+  margin-top: 10px; display: none; line-height: 1.5;
+}
+.result-note.on { display: block; }
+
+/* ══════════════════════════════════════
+   SESSION / QUESTIONS
+══════════════════════════════════════ */
+.session-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  transition: all 0.2s;
+}
+.session-card:hover { border-color: var(--gold); }
+.sc-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 12px; gap: 12px;
+}
+.sc-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 600;
+  color: var(--ink); margin-bottom: 3px;
+}
+.sc-meta { font-size: 0.75rem; color: var(--fog); }
+.sc-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.sc-summary {
+  font-size: 0.82rem; color: var(--fog);
+  line-height: 1.6; margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sc-questions { display: flex; flex-direction: column; gap: 10px; }
+
+.question-item {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.q-num {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem;
+  color: var(--fog);
+  background: var(--warm);
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.q-body { flex: 1; }
+.q-text { font-size: 0.85rem; color: var(--ink); line-height: 1.5; margin-bottom: 6px; font-weight: 500; }
+.q-answer-preview { font-size: 0.75rem; color: var(--fog); font-style: italic; }
+.q-edit-area {
+  width: 100%;
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-family: 'Instrument Sans', sans-serif;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  margin-top: 6px;
+}
+.q-edit-area:focus { border-color: var(--gold); }
+.q-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+.send-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.badge-sent { background: rgba(74,103,65,0.1); color: var(--sage); border: 1px solid rgba(74,103,65,0.2); }
+.badge-draft { background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+
+/* ══════════════════════════════════════
+   RESPONSES PANEL
+══════════════════════════════════════ */
+.response-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.resp-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.resp-card-top {
+  padding: 16px 18px 12px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.resp-avatar {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 0.85rem; color: white;
+  flex-shrink: 0;
+}
+.resp-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
+.resp-role { font-size: 0.72rem; color: var(--fog); }
+.resp-score-ring {
+  margin-left: auto;
+  width: 42px; height: 42px;
+  position: relative;
+}
+.resp-score-ring svg { transform: rotate(-90deg); }
+.resp-score-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem; font-weight: 700;
+}
+.resp-answers { padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+.resp-answer-item { font-size: 0.78rem; display: flex; gap: 8px; align-items: flex-start; }
+.ans-indicator {
+  width: 16px; height: 16px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; margin-top: 1px;
+}
+.ans-correct { background: rgba(74,103,65,0.15); color: var(--sage); }
+.ans-wrong { background: rgba(192,82,42,0.15); color: var(--ember); }
+.ans-partial { background: rgba(201,168,76,0.15); color: var(--gold); }
+.ans-pending { background: rgba(140,134,128,0.15); color: var(--fog); }
+.resp-answer-text { color: var(--fog); line-height: 1.4; flex: 1; }
+.resp-answer-text strong { color: var(--ink); }
+
+.divergence-box {
+  background: rgba(192,82,42,0.05);
+  border: 1px solid rgba(192,82,42,0.15);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.divergence-box h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.88rem; color: var(--ember);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* ══════════════════════════════════════
+   BOTTLE — THE BEAUTIFUL ONE
+══════════════════════════════════════ */
+.bottle-panel {
+  max-width: 700px; margin: 0 auto;
+}
+.bottle-visual {
+  background: var(--ink);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.bottle-visual::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 70%);
+}
+.bottle-label-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; position: relative;
+}
+.bottle-eyebrow {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--fog);
+}
+.bottle-score-big {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem; font-weight: 900;
+  color: var(--paper); line-height: 1;
+  letter-spacing: -0.04em;
+}
+.bottle-score-big span { font-size: 1.4rem; color: var(--fog); }
+
+/* fill meter */
+.fill-meter {
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.fill-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+}
+.fill-bar.low { background: linear-gradient(90deg, var(--ember), #e07050); }
+.fill-bar.mid { background: linear-gradient(90deg, var(--gold), #d4ac50); }
+.fill-bar.high { background: linear-gradient(90deg, var(--sage), #6ab05a); }
+
+.understanding-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px; margin-top: 16px;
+}
+.um-cell {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 9px;
+  padding: 10px 8px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.um-cell.clear { border-color: rgba(74,103,65,0.4); background: rgba(74,103,65,0.1); }
+.um-cell.confused { border-color: rgba(192,82,42,0.4); background: rgba(192,82,42,0.1); }
+.um-cell.partial { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.08); }
+.um-cell.pending { opacity: 0.4; }
+.um-name { font-size: 0.68rem; color: var(--fog2); margin-bottom: 4px; font-weight: 500; }
+.um-icon { font-size: 1rem; }
+
+/* ══════════════════════════════════════
+   MEMBER SCREEN
+══════════════════════════════════════ */
+#screen-member { background: var(--paper); flex-direction: column; }
+
+.member-body { padding: 32px 28px; max-width: 720px; margin: 0 auto; width: 100%; }
+
+.member-greeting-block {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px;
+}
+.member-big-av {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 900; font-size: 1.2rem; color: white;
+  flex-shrink: 0;
+}
+.mbg-text h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 2px;
+}
+.mbg-text p { font-size: 0.78rem; color: var(--fog); }
+
+/* live summary strip */
+.live-summary {
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 22px;
+  position: relative; overflow: hidden;
+}
+.live-summary::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold2), transparent);
+}
+.ls-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.ls-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--gold2);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.ls-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gold);
+}
+.ls-text { font-size: 0.82rem; color: var(--fog2); line-height: 1.65; }
+
+/* assessment card */
+.assessment-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+}
+.assessment-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--ink);
+}
+.my-score-pill {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem; padding: 5px 14px;
+  border-radius: 20px;
+}
+
+/* question cards for member */
+.mq-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.mq-card.answered-correct { border-left: 3px solid var(--sage); }
+.mq-card.answered-wrong { border-left: 3px solid var(--ember); }
+.mq-card.answered-partial { border-left: 3px solid var(--gold); }
+.mq-num-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.mq-num {
+  font-family: 'Courier Prime', monospace; font-size: 0.65rem;
+  color: var(--fog); background: var(--warm);
+  padding: 2px 8px; border-radius: 5px;
+}
+.mq-status { font-size: 0.72rem; color: var(--fog); }
+.mq-question { font-size: 0.92rem; font-weight: 600; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
+
+.mq-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.mq-option {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 11px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--ink);
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 10px;
+  text-align: left;
+}
+.mq-option:hover { border-color: var(--gold); background: rgba(201,168,76,0.04); }
+.mq-option.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.mq-option.correct { border-color: var(--sage); background: rgba(74,103,65,0.08); color: var(--sage); }
+.mq-option.wrong { border-color: var(--ember); background: rgba(192,82,42,0.08); color: var(--ember); }
+.mq-option input[type=radio] { display: none; }
+.opt-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0; transition: all 0.15s;
+}
+.mq-option.selected .opt-dot, .mq-option.correct .opt-dot {
+  background: var(--gold); border-color: var(--gold);
+}
+.mq-option.wrong .opt-dot { background: var(--ember); border-color: var(--ember); }
+
+.mq-open-input {
+  width: 100%;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  font-family: 'Instrument Sans', sans-serif;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  min-height: 90px;
+  margin-bottom: 12px;
+}
+.mq-open-input:focus { border-color: var(--gold); }
+.mq-open-input:disabled { opacity: 0.7; background: var(--paper2); }
+
+.mq-feedback {
+  font-size: 0.78rem; line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 8px; display: none;
+}
+.mq-feedback.on { display: block; }
+.mq-feedback.correct-fb { background: rgba(74,103,65,0.08); color: var(--sage); border: 1px solid rgba(74,103,65,0.2); }
+.mq-feedback.wrong-fb { background: rgba(192,82,42,0.06); color: var(--ember); border: 1px solid rgba(192,82,42,0.15); }
+
+.ask-q-area {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex; gap: 8px; align-items: flex-end;
+  margin-top: 10px;
+}
+.ask-q-input {
+  flex: 1; border: none; outline: none;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.82rem; color: var(--ink);
+  background: transparent; resize: none; min-height: 38px;
+}
+.ask-q-input::placeholder { color: var(--fog2); }
+
+/* revision sheet */
+.revision-block {
+  background: var(--ink);
+  border-radius: 16px;
+  padding: 24px 26px;
+  margin-top: 28px;
+}
+.rev-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700;
+  color: var(--gold2); margin-bottom: 4px;
+  display: flex; align-items: center; gap: 9px;
+}
+.rev-sub { font-size: 0.75rem; color: var(--fog); margin-bottom: 18px; }
+.rev-items { display: flex; flex-direction: column; gap: 12px; }
+.rev-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.rev-item-q { font-size: 0.78rem; color: var(--fog2); margin-bottom: 5px; font-style: italic; }
+.rev-item-a { font-size: 0.82rem; color: var(--paper); line-height: 1.6; }
+.rev-item.needs-review { border-color: rgba(192,82,42,0.3); }
+.rev-item-tag {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px; margin-bottom: 6px; display: inline-block;
+}
+.tag-review { background: rgba(192,82,42,0.15); color: var(--ember); }
+.tag-clear { background: rgba(74,103,65,0.15); color: #6ab05a; }
+
+/* ══════════════════════════════════════
+   TEAM PAGE
+══════════════════════════════════════ */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.tm-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  transition: all 0.18s;
+}
+.tm-card:hover { border-color: var(--gold); }
+.tm-av {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 0.9rem; color: white;
+  margin-bottom: 10px;
+}
+.tm-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+.tm-role { font-size: 0.72rem; color: var(--fog); margin-bottom: 12px; }
+.tm-link {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.68rem; color: var(--fog);
+  cursor: pointer; transition: all 0.15s;
+  word-break: break-all;
+}
+.tm-link:hover { border-color: var(--gold); color: var(--gold); }
+.add-tm {
+  border: 1.5px dashed var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6px; cursor: pointer; color: var(--fog);
+  transition: all 0.2s; background: transparent; min-height: 140px;
+}
+.add-tm:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(14,12,10,0.75);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: none; align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px;
+  width: 90%; max-width: 460px;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+}
+.modal h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; margin-bottom: 5px;
+}
+.modal .modal-sub { font-size: 0.8rem; color: var(--fog); margin-bottom: 22px; }
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  background: var(--warm); border: 1px solid var(--border);
+  color: var(--fog); width: 28px; height: 28px;
+  border-radius: 7px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--ink); }
+.form-g { margin-bottom: 14px; }
+.form-g label {
+  display: block; font-size: 0.72rem; color: var(--fog);
+  margin-bottom: 5px; font-family: 'Courier Prime', monospace;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.form-g input, .form-g select, .form-g textarea {
+  width: 100%;
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 13px;
+  color: var(--ink);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-g input:focus, .form-g select:focus, .form-g textarea:focus { border-color: var(--gold); }
+.form-g textarea { min-height: 80px; resize: vertical; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast-wrap {
+  position: fixed; bottom: 22px; right: 22px;
+  display: flex; flex-direction: column; gap: 8px; z-index: 999;
+}
+.toast {
+  background: var(--ink); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 11px; padding: 11px 16px;
+  font-size: 0.8rem; color: var(--paper2);
+  display: flex; align-items: center; gap: 9px;
+  animation: tslide 0.3s ease, tfade 0.3s ease 3.7s forwards;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4); max-width: 280px;
+}
+.toast.ok { border-left: 3px solid var(--sage); }
+.toast.err { border-left: 3px solid var(--ember); }
+.toast.info { border-left: 3px solid var(--gold); }
+@keyframes tslide { from{transform:translateX(80px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+@keyframes tfade { from{opacity:1;} to{opacity:0;pointer-events:none;} }
+
+/* ══════════════════════════════════════
+   SCROLLBAR + MISC
+══════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 0.7rem; font-weight: 600;
+  font-family: 'Courier Prime', monospace;
+}
+.chip-pending { background: var(--warm); color: var(--fog); border: 1px solid var(--border); }
+.chip-live { background: rgba(74,103,65,0.1); color: var(--sage); border: 1px solid rgba(74,103,65,0.2); }
+.chip-complete { background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+
+.empty {
+  text-align: center; padding: 60px 20px; color: var(--fog);
+}
+.empty .ei { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+.empty h3 {
+  font-family: 'Playfair Display', serif; font-size: 1rem;
+  color: var(--fog2); margin-bottom: 6px;
+}
+.empty p { font-size: 0.8rem; max-width: 280px; margin: 0 auto; line-height: 1.5; }
+
+@media(max-width:768px){
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar { display: none; }
+  .admin-main { padding: 22px 18px; }
+  .landing-cards { grid-template-columns: 1fr; }
+  .response-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LANDING ═══ -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-center">
+    <div class="bottle-glyph">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 8h16v6l6 10v24a6 6 0 01-6 6H24a6 6 0 01-6-6V24l6-10V8z" stroke="#c9a84c" stroke-width="1.5" fill="rgba(201,168,76,0.06)"/>
+        <path d="M22 36h20M22 42h14" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/>
+        <rect x="27" y="4" width="10" height="4" rx="2" fill="#c9a84c" opacity="0.6"/>
+        <circle cx="38" cy="30" r="3" fill="rgba(201,168,76,0.3)" stroke="#c9a84c" stroke-width="1"/>
+      </svg>
+    </div>
+    <p class="landing-eyebrow">Staffingly</p>
+    <h1 class="landing-title">Bottle of <em>Understanding</em></h1>
+    <p class="landing-sub">Every fast conversation, every half-finished sentence — distilled into clarity. Knowledge checks, live summaries, and a revision sheet that stays with you through every build.</p>
+    <div class="landing-cards">
+      <div class="l-card" onclick="goAdmin()">
+        <div class="l-card-icon">⚗️</div>
+        <h3>Admin / Dan</h3>
+        <p>Create sessions, AI-generate questions, review team understanding</p>
+      </div>
+      <div class="l-card" onclick="promptToken()">
+        <div class="l-card-icon">📖</div>
+        <h3>Team Member</h3>
+        <p>Take your assessment, ask questions, access your revision sheet</p>
+      </div>
+      <div class="l-token-row">
+        <p>Have your personal session link?</p>
+        <div class="l-token-input-row">
+          <input class="l-token-input" id="token-input" placeholder="paste your ?member=... token" />
+          <button class="btn-enter" onclick="loadFromToken()">Enter →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN SCREEN ═══ -->
+<div id="screen-admin" class="screen">
+  <nav class="top-nav">
+    <div class="nav-logo" onclick="showScreen('landing')">
+      ⚗ Staffingly <span class="sub">Bottle of Understanding</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-pill admin">Admin View</span>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('landing')">← Back</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadState().then(()=>{renderSessions();renderTeamGrid();renderResponses();renderBottle();populateSessionFilter();toast('Refreshed ✓','ok')})">↺ Refresh</button>
+    </div>
+  </nav>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="sb-section">
+        <div class="sb-label">Import</div>
+        <div class="sb-item active" id="nav-import" onclick="switchPanel('import')"><span class="si">💬</span> From Chat / Notes</div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Sessions</div>
+        <div class="sb-item" id="nav-sessions" onclick="switchPanel('sessions')"><span class="si">📋</span> All Sessions</div>
+        <div class="sb-item" id="nav-responses" onclick="switchPanel('responses')"><span class="si">📊</span> Responses</div>
+        <div class="sb-item" id="nav-bottle" onclick="switchPanel('bottle')"><span class="si">⚗️</span> Bottle View</div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">People</div>
+        <div class="sb-item" id="nav-team" onclick="switchPanel('team')"><span class="si">👥</span> Team Members</div>
+      </div>
+    </aside>
+
+    <!-- IMPORT -->
+    <main class="admin-main" id="panel-import">
+      <div class="ph">
+        <div><div class="ph-title">Import Meeting Notes</div><div class="ph-sub">Paste WhatsApp chat, voice notes transcript, or meeting notes — AI will extract key points and draft assessment questions</div></div>
+      </div>
+      <div class="import-box" id="drop-zone" onclick="document.getElementById('import-file').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <input type="file" id="import-file" accept=".txt,.md,.csv" onchange="onFileSelect(event)">
+        <div class="import-icon">📄</div>
+        <h3>Drop meeting notes or chat export here</h3>
+        <p>.txt, .md files · or paste below</p>
+      </div>
+      <div class="divider-or">or paste directly</div>
+      <textarea class="paste-box" id="notes-paste" placeholder="Paste your WhatsApp chat, Zoom transcript, or meeting notes here...&#10;&#10;Dan: ok so the new homepage — hero section should have video background, copy says 'Built for teams that move fast', CTA says 'Get started free', mobile first&#10;Sarah: wait is the video autoplay or click to play&#10;Dan: autoplay muted, loop, you handle that&#10;Sarah: got it. what about the nav?&#10;Dan: sticky, logo left links right, no hamburger on desktop..."></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <input class="form-g" style="flex:1;min-width:200px;margin:0;padding:9px 13px;background:var(--paper2);border:1px solid var(--border);border-radius:9px;font-size:0.85rem;color:var(--ink);outline:none;" id="session-name-input" placeholder="Session name (e.g. 'Homepage Brief — Mar 8')">
+        <button class="btn btn-gold" onclick="generateSession()">✨ Generate Session with AI</button>
+        <button class="btn btn-ghost" onclick="loadSampleNotes()">Load sample</button>
+      </div>
+      <div class="ai-working" id="ai-thinking">
+        <div class="ai-orb">✦</div>
+        <div class="ai-working-text"><strong>AI IS DISTILLING THE CONVERSATION</strong><br>Extracting key decisions, ambiguities & generating assessment questions...</div>
+      </div>
+      <div class="result-note" id="gen-result"></div>
+    </main>
+
+    <!-- SESSIONS -->
+    <main class="admin-main hidden" id="panel-sessions">
+      <div class="ph">
+        <div><div class="ph-title">Sessions</div><div class="ph-sub">Each session is one meeting or chat block. AI drafts questions; you can edit before sending.</div></div>
+        <button class="btn btn-gold btn-sm" onclick="switchPanel('import')">+ New Session</button>
+      </div>
+      <div id="sessions-list"><div class="empty"><div class="ei">📋</div><h3>No sessions yet</h3><p>Import a chat or meeting notes to create the first session</p></div></div>
+    </main>
+
+    <!-- RESPONSES -->
+    <main class="admin-main hidden" id="panel-responses">
+      <div class="ph">
+        <div><div class="ph-title">Team Responses</div><div class="ph-sub">See how each person answered. Divergence flags where people understood differently.</div></div>
+        <select id="resp-session-filter" class="form-g" style="margin:0;width:220px;padding:8px 12px;" onchange="renderResponses()">
+          <option value="">All Sessions</option>
+        </select>
+      </div>
+      <div id="divergence-section"></div>
+      <div class="response-grid" id="responses-grid">
+        <div class="empty" style="grid-column:1/-1"><div class="ei">📊</div><h3>No responses yet</h3><p>Team members answer when you send them their dashboard link</p></div>
+      </div>
+    </main>
+
+    <!-- BOTTLE VIEW -->
+    <main class="admin-main hidden" id="panel-bottle">
+      <div class="ph">
+        <div><div class="ph-title">Bottle of Understanding</div><div class="ph-sub">Team-wide comprehension at a glance</div></div>
+      </div>
+      <div class="bottle-panel" id="bottle-content">
+        <div class="empty"><div class="ei">⚗️</div><h3>Fill the bottle</h3><p>Understanding grows as your team completes their assessments</p></div>
+      </div>
+    </main>
+
+    <!-- TEAM -->
+    <main class="admin-main hidden" id="panel-team">
+      <div class="ph">
+        <div><div class="ph-title">Team Members</div><div class="ph-sub">Each person gets a private link to their personal Bottle of Understanding</div></div>
+      </div>
+      <div class="team-grid" id="team-grid">
+        <div class="tm-card add-tm" onclick="openModal('modal-member')">
+          <div style="font-size:1.6rem">+</div>
+          <span style="font-size:0.82rem;font-weight:500">Add Member</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══ MEMBER SCREEN ═══ -->
+<div id="screen-member" class="screen">
+  <nav class="top-nav">
+    <div class="nav-logo" onclick="showScreen('landing')">⚗ Staffingly <span class="sub">Bottle of Understanding</span></div>
+    <div class="nav-right">
+      <span class="nav-pill member" id="member-nav-name">—</span>
+    </div>
+  </nav>
+  <div class="member-body" id="member-body">
+    <div class="empty" style="margin-top:80px"><div class="ei">🔗</div><h3>No session found</h3><p>Use the link your admin shared with you</p></div>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+<div class="overlay" id="modal-member">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
+    <h2>Add Team Member</h2>
+    <p class="modal-sub">They'll receive a personal bottle link for every session.</p>
+    <div class="form-g"><label>Full Name</label><input id="nm-name" placeholder="e.g. Sarah Okonkwo"></div>
+    <div class="form-g"><label>Role</label><input id="nm-role" placeholder="e.g. Frontend Dev, Designer..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-member')">Cancel</button>
+      <button class="btn btn-gold" onclick="addMember()">Add Member</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-edit-q">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-edit-q')">✕</button>
+    <h2>Edit Question</h2>
+    <p class="modal-sub">Refine the AI-generated question before sending.</p>
+    <div class="form-g"><label>Question Text</label><textarea id="eq-text" rows="3"></textarea></div>
+    <div class="form-g"><label>Correct Answer / Key Points</label><textarea id="eq-answer" rows="3" placeholder="What constitutes a correct or good answer..."></textarea></div>
+    <div class="form-g">
+      <label>Type</label>
+      <select id="eq-type">
+        <option value="open">Open-ended (text answer)</option>
+        <option value="mcq">Multiple choice</option>
+      </select>
+    </div>
+    <div id="eq-options-block" style="display:none">
+      <div class="form-g"><label>Options (one per line)</label><textarea id="eq-options" rows="4" placeholder="Option A&#10;Option B&#10;Option C&#10;Option D"></textarea></div>
+      <div class="form-g"><label>Correct option (exactly as written above)</label><input id="eq-correct-opt"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-q')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEditedQuestion()">Save Question</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  SECURITY
+// ══════════════════════════════════════════
+function esc(s){ if(s===null||s===undefined)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+const ANTHROPIC_KEY = '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';
+
+// ── localStorage helpers ──
+function lsGet(key){ try{ return JSON.parse(localStorage.getItem('bou_'+key)||'[]'); }catch(e){ return []; } }
+function lsSet(key,val){ localStorage.setItem('bou_'+key, JSON.stringify(val)); }
+function lsUpsert(table, item, matchFn){
+  const rows = lsGet(table);
+  const idx = rows.findIndex(matchFn);
+  if(idx>=0) rows[idx]={...rows[idx],...item}; else rows.push(item);
+  lsSet(table, rows);
+}
+function lsDelete(table, matchFn){ lsSet(table, lsGet(table).filter(r=>!matchFn(r))); }
+
+// ══════════════════════════════════════════
+//  STATE  (localStorage)
+// ══════════════════════════════════════════
+const COLORS=['#5b8cff','#c0522a','#c9a84c','#4a6741','#c084fc','#fb923c','#34d399','#f472b6'];
+let state = { members:[], sessions:[], responses:[] };
+let _dbReady = false;
+
+async function loadState(){
+  state.members  = lsGet('members');
+  state.sessions = lsGet('sessions');
+  state.responses = lsGet('responses');
+  _dbReady = true;
+}
+
+// Save helpers — localStorage only
+async function dbSaveMember(m){ lsUpsert('members', m, r=>r.id===m.id); }
+async function dbSaveSession(s){ lsUpsert('sessions', s, r=>r.id===s.id); }
+async function dbUpdateSession(s){ lsUpsert('sessions', s, r=>r.id===s.id); }
+async function dbSaveResponse(r){ lsUpsert('responses', r, x=>x.sessionId===r.sessionId&&x.memberToken===r.memberToken); }
+async function dbUpdateResponse(r){ lsUpsert('responses', r, x=>x.sessionId===r.sessionId&&x.memberToken===r.memberToken); }
+async function dbDeleteSession(sid){
+  lsDelete('responses', r=>r.sessionId===sid);
+  lsDelete('sessions', s=>s.id===sid);
+}
+function saveAll(){ toast('Saved ✓','ok'); }
+
+function genId(){ return Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,6); }
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+async function goAdmin(){
+  showScreen('admin'); switchPanel('import');
+  toast('Loading from database...','info');
+  await loadState();
+  renderSessions(); renderTeamGrid(); renderResponses(); renderBottle();
+  populateSessionFilter();
+}
+function switchPanel(id){
+  document.querySelectorAll('.admin-main').forEach(p=>p.classList.add('hidden'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.remove('hidden');
+  document.getElementById('nav-'+id)?.classList.add('active');
+}
+function promptToken(){
+  const t=prompt('Enter your member token (from your admin):');
+  if(t) loadMemberView(t.trim());
+}
+function loadFromToken(){
+  const val=document.getElementById('token-input').value.trim();
+  if(!val) return toast('Enter a token','err');
+  const p=new URLSearchParams(val.replace(/.*\?/,''));
+  loadMemberView(p.get('member')||val);
+}
+
+
+// ══════════════════════════════════════════
+//  TEAM
+// ══════════════════════════════════════════
+async function addMember(){
+  const name=document.getElementById('nm-name').value.trim();
+  const role=document.getElementById('nm-role').value.trim();
+  if(!name) return toast('Enter a name','err');
+  const m={name,role:role||'Team Member',token:genId(),id:genId()};
+  try{
+    await dbSaveMember(m);
+    state.members.push(m);
+    document.getElementById('nm-name').value='';
+    document.getElementById('nm-role').value='';
+    closeModal('modal-member');
+    renderTeamGrid(); toast(`${name} added`,'ok');
+  }catch(e){ toast('Failed to add member','err'); console.error(e); }
+}
+function renderTeamGrid(){
+  const g=document.getElementById('team-grid'); if(!g)return;
+  let h=`<div class="tm-card add-tm" onclick="openModal('modal-member')"><div style="font-size:1.6rem">+</div><span style="font-size:0.82rem;font-weight:500">Add Member</span></div>`;
+  state.members.forEach((m,i)=>{
+    const col=COLORS[i%COLORS.length];
+    const init=m.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const link=`${window.location.href.split('?')[0]}?member=${m.token}`;
+    h+=`<div class="tm-card">
+      <div class="tm-av" style="background:${col}">${esc(init)}</div>
+      <div class="tm-name">${esc(m.name)}</div>
+      <div class="tm-role">${esc(m.role||'Team Member')}</div>
+      <div class="tm-link" onclick="copyLink('${link}')" title="Copy link">?member=${esc(m.token)} 📋</div>
+    </div>`;
+  });
+  g.innerHTML=h;
+}
+function copyLink(l){ navigator.clipboard.writeText(l).then(()=>toast('Link copied!','ok')); }
+
+// ══════════════════════════════════════════
+//  IMPORT & AI
+// ══════════════════════════════════════════
+let editingQ={sessionId:null,qIndex:null};
+
+function loadSampleNotes(){
+  document.getElementById('notes-paste').value=`[08/03/2025, 09:02] Dan: ok team, homepage redesign brief. hero section — full-width video background, autoplay muted loop. headline is "Built for teams that move fast". subheadline: "Staffingly manages your projects, your conversations, and your clarity — all in one place". primary CTA button says "Start free" in gold, secondary is "See how it works" ghost button
+[08/03/2025, 09:04] Sarah: what size video? do we have the asset already?
+[08/03/2025, 09:05] Dan: mp4 under 8mb, we're getting it from the brand team. Sarah you handle compression and integration
+[08/03/2025, 09:06] Dan: nav is sticky on scroll, logo left, links are Features Pricing About and a Sign In button. No hamburger on desktop, yes on mobile
+[08/03/2025, 09:07] Emeka: what breakpoints are we using?
+[08/03/2025, 09:08] Dan: 1280 desktop, 768 tablet, 375 mobile. Emeka you own responsive implementation
+[08/03/2025, 09:09] Dan: below hero is a 3-column features section. icons are outlined not filled. copy TBD from marketing
+[08/03/2025, 09:10] Blessing: who is writing the features copy?
+[08/03/2025, 09:11] Dan: marketing team sends it by Wednesday. Blessing you plug it in when it arrives
+[08/03/2025, 09:12] Dan: footer has 4 columns: Product, Company, Resources, Legal. All links TBD. John you handle the footer
+[08/03/2025, 09:13] Dan: we go live Friday. no delays.`;
+  document.getElementById('session-name-input').value='Homepage Redesign Brief — Mar 8';
+}
+
+function onDragOver(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('drag'); }
+function onDragLeave(){ document.getElementById('drop-zone').classList.remove('drag'); }
+function onDrop(e){ e.preventDefault(); onDragLeave(); const f=e.dataTransfer.files[0]; if(f) loadFile(f); }
+function onFileSelect(e){ if(e.target.files[0]) loadFile(e.target.files[0]); }
+function loadFile(f){
+  const r=new FileReader(); r.onload=e=>{ document.getElementById('notes-paste').value=e.target.result.slice(0,10000); toast(`Loaded ${f.name}`,'ok'); }; r.readAsText(f);
+}
+
+async function generateSession(){
+  const notes=document.getElementById('notes-paste').value.trim();
+  const name=document.getElementById('session-name-input').value.trim()||'Session '+new Date().toLocaleDateString();
+  if(!notes) return toast('Paste some notes first','err');
+  document.getElementById('ai-thinking').classList.add('on');
+  document.getElementById('gen-result').classList.remove('on');
+  try{
+    const raw=await callAI(`You are an expert facilitator. Analyze this meeting/chat and create a knowledge assessment session.
+
+Return ONLY valid JSON, no markdown:
+{
+  "summary": "3-4 sentence summary of key decisions made, who owns what, and any ambiguities or fast-spoken instructions that need clarification",
+  "liveSummary": "2 sentence constantly-updated briefing of the current state of the project based on this conversation",
+  "keyDecisions": ["decision 1","decision 2","decision 3"],
+  "questions": [
+    {
+      "text": "clear, specific question testing understanding of a key decision or instruction",
+      "type": "open",
+      "correctAnswer": "what a correct/good answer looks like",
+      "options": [],
+      "correctOption": ""
+    }
+  ],
+  "suggestedMembers": ["name1","name2"]
+}
+
+Rules:
+- Generate 4-6 questions. Mix open-ended and multiple choice (set type to "mcq" for mcq, include options array with 4 items and correctOption)
+- Focus on: who owns what task, specific technical/creative decisions made, deadlines, anything spoken quickly that could be misunderstood
+- Make questions test REAL comprehension, not just memory. "What did Dan say about..." is bad. "Who is responsible for X and by when?" is good.
+- For MCQ: options must be plausible, correctOption must exactly match one option
+
+Notes/Chat:
+${notes.slice(0,5000)}`);
+
+    const data=JSON.parse(raw);
+    const session={
+      id:genId(), name, notes:notes.slice(0,5000),
+      summary:data.summary||'', liveSummary:data.liveSummary||'',
+      keyDecisions:data.keyDecisions||[],
+      questions:(data.questions||[]).map((q,i)=>({...q,id:genId(),index:i})),
+      status:'draft', createdAt:new Date().toISOString(),
+      suggestedMembers:data.suggestedMembers||[]
+    };
+    state.sessions.push(session);
+    // auto-add suggested members
+    for(const sname of (session.suggestedMembers||[])){
+      if(!state.members.find(m=>m.name.toLowerCase()===sname.toLowerCase())){
+        const nm={name:sname,role:'Team Member',token:genId(),id:genId()};
+        try{ await dbSaveMember(nm); state.members.push(nm); }catch(e){}
+      }
+    }
+    await dbSaveSession(session);
+    document.getElementById('gen-result').textContent=`✓ Session "${name}" created with ${session.questions.length} questions. Go to Sessions to review and send.`;
+    document.getElementById('gen-result').classList.add('on');
+    renderSessions(); renderTeamGrid(); populateSessionFilter();
+    toast(`Session created! ${session.questions.length} questions drafted`,'ok');
+  }catch(e){
+    toast('AI generation failed. Check console.','err'); console.error(e);
+  }finally{
+    document.getElementById('ai-thinking').classList.remove('on');
+  }
+}
+
+// ══════════════════════════════════════════
+//  SESSIONS LIST
+// ══════════════════════════════════════════
+function renderSessions(){
+  const el=document.getElementById('sessions-list'); if(!el)return;
+  if(!state.sessions.length){
+    el.innerHTML=`<div class="empty"><div class="ei">📋</div><h3>No sessions yet</h3><p>Import meeting notes to create the first session</p></div>`;
+    return;
+  }
+  el.innerHTML=state.sessions.map(s=>{
+    const respCount=state.responses.filter(r=>r.sessionId===s.id).length;
+    const statusChip=s.status==='sent'?'chip-live':s.status==='complete'?'chip-complete':'chip-pending';
+    const statusLabel=s.status==='sent'?'Live':s.status==='complete'?'Complete':'Draft';
+    return `<div class="session-card">
+      <div class="sc-top">
+        <div>
+          <div class="sc-title">${esc(s.name)}</div>
+          <div class="sc-meta">${new Date(s.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} · ${s.questions.length} questions · ${respCount} responses</div>
+        </div>
+        <div class="sc-actions">
+          <span class="chip ${statusChip}">${statusLabel}</span>
+          ${s.status==='draft'?`<button class="btn btn-gold btn-sm" onclick="sendSession('${s.id}')">Send to Team</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="deleteSession('${s.id}')">✕</button>
+        </div>
+      </div>
+      <div class="sc-summary">${esc(s.summary)}</div>
+      <div class="sc-questions">
+        ${s.questions.map((q,i)=>`
+          <div class="question-item">
+            <div class="q-num">${i+1}</div>
+            <div class="q-body">
+              <div class="q-text">${esc(q.text)}</div>
+              <div class="q-answer-preview">Expected: ${esc(q.correctAnswer||'—')}</div>
+              ${q.type==='mcq'&&q.options?.length?`<div class="q-answer-preview" style="margin-top:3px">Options: ${q.options.map(o=>esc(o)).join(' · ')}</div>`:''}
+            </div>
+            <div style="flex-shrink:0;display:flex;gap:6px;flex-direction:column;align-items:flex-end">
+              <button class="btn btn-ghost btn-sm" onclick="openEditQ('${s.id}',${i})">Edit</button>
+            </div>
+          </div>`).join('')}
+      </div>
+      ${s.status==='draft'?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-gold btn-sm" onclick="sendSession('${s.id}')">✉ Send to Team</button>
+        <button class="btn btn-ghost btn-sm" onclick="regenerateQuestions('${s.id}')">↻ Regenerate Questions</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function sendSession(sid){
+  const s=state.sessions.find(s=>s.id===sid); if(!s)return;
+  s.status='sent';
+  try{ await dbUpdateSession(s); renderSessions(); toast(`Session "${s.name}" is now live for the team`,'ok'); }
+  catch(e){ toast('Failed to send session','err'); console.error(e); }
+}
+async function deleteSession(sid){
+  if(!confirm('Delete this session?'))return;
+  try{
+    await dbDeleteSession(sid);
+    state.sessions=state.sessions.filter(s=>s.id!==sid);
+    state.responses=state.responses.filter(r=>r.sessionId!==sid);
+    renderSessions(); renderResponses(); renderBottle();
+    toast('Session deleted','info');
+  }catch(e){ toast('Failed to delete','err'); console.error(e); }
+}
+
+// Question edit
+function openEditQ(sid,idx){
+  const s=state.sessions.find(s=>s.id===sid); if(!s)return;
+  const q=s.questions[idx]; if(!q)return;
+  editingQ={sessionId:sid,qIndex:idx};
+  document.getElementById('eq-text').value=q.text;
+  document.getElementById('eq-answer').value=q.correctAnswer||'';
+  document.getElementById('eq-type').value=q.type||'open';
+  document.getElementById('eq-options').value=(q.options||[]).join('\n');
+  document.getElementById('eq-correct-opt').value=q.correctOption||'';
+  document.getElementById('eq-options-block').style.display=q.type==='mcq'?'block':'none';
+  document.getElementById('eq-type').onchange=function(){ document.getElementById('eq-options-block').style.display=this.value==='mcq'?'block':'none'; };
+  openModal('modal-edit-q');
+}
+async function saveEditedQuestion(){
+  const {sessionId,qIndex}=editingQ;
+  const s=state.sessions.find(s=>s.id===sessionId); if(!s)return;
+  const q=s.questions[qIndex]; if(!q)return;
+  q.text=document.getElementById('eq-text').value.trim();
+  q.correctAnswer=document.getElementById('eq-answer').value.trim();
+  q.type=document.getElementById('eq-type').value;
+  if(q.type==='mcq'){
+    q.options=document.getElementById('eq-options').value.split('\n').map(o=>o.trim()).filter(Boolean);
+    q.correctOption=document.getElementById('eq-correct-opt').value.trim();
+  } else { q.options=[]; q.correctOption=''; }
+  try{ await dbUpdateSession(s); closeModal('modal-edit-q'); renderSessions(); toast('Question updated','ok'); }
+  catch(e){ toast('Failed to save question','err'); console.error(e); }
+}
+
+async function regenerateQuestions(sid){
+  const s=state.sessions.find(s=>s.id===sid); if(!s)return;
+  toast('Regenerating questions...','info');
+  try{
+    const raw=await callAI(`Regenerate 4-6 fresh assessment questions for this meeting/chat. Return only JSON with key "questions" containing same structure as before (text, type, correctAnswer, options, correctOption).
+Chat: ${s.notes.slice(0,4000)}`);
+    const data=JSON.parse(raw);
+    s.questions=(data.questions||[]).map((q,i)=>({...q,id:genId(),index:i}));
+    await dbUpdateSession(s); renderSessions(); toast('Questions regenerated','ok');
+  }catch(e){ toast('Regeneration failed','err'); }
+}
+
+// ══════════════════════════════════════════
+//  RESPONSES
+// ══════════════════════════════════════════
+function populateSessionFilter(){
+  const sel=document.getElementById('resp-session-filter'); if(!sel)return;
+  sel.innerHTML=`<option value="">All Sessions</option>`+state.sessions.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+}
+function renderResponses(){
+  const grid=document.getElementById('responses-grid'); if(!grid)return;
+  const fid=document.getElementById('resp-session-filter')?.value||'';
+  let resps=fid?state.responses.filter(r=>r.sessionId===fid):state.responses;
+  if(!resps.length){
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">📊</div><h3>No responses yet</h3><p>Team members answer when you send them their dashboard link</p></div>`;
+    document.getElementById('divergence-section').innerHTML=''; return;
+  }
+  // Divergence detection
+  const divEl=document.getElementById('divergence-section');
+  const divergences=detectDivergences(resps,fid);
+  divEl.innerHTML=divergences.length?`<div class="divergence-box"><h4>⚠ Understanding Divergence Detected</h4>${divergences.map(d=>`<div style="margin-bottom:6px;font-size:0.8rem;color:var(--fog)">On <strong style="color:var(--ink)">"${esc(d.question)}"</strong> — ${esc(d.detail)}</div>`).join('')}</div>`:'';
+
+  grid.innerHTML=resps.map(r=>{
+    const m=state.members.find(m=>m.token===r.memberToken)||{name:r.memberToken,role:'Unknown'};
+    const col=COLORS[state.members.indexOf(m)%COLORS.length]||COLORS[0];
+    const init=m.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const score=calcScore(r);
+    const scoreColor=score>=80?'#4a6741':score>=50?'#c9a84c':'#c0522a';
+    const circumference=2*Math.PI*16;
+    const dash=circumference*(score/100);
+    const s=state.sessions.find(s=>s.id===r.sessionId);
+    return `<div class="resp-card">
+      <div class="resp-card-top">
+        <div class="resp-avatar" style="background:${col}">${esc(init)}</div>
+        <div><div class="resp-name">${esc(m.name)}</div><div class="resp-role">${esc(m.role||'—')}</div></div>
+        <div class="resp-score-ring">
+          <svg width="42" height="42" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="16" fill="none" stroke="var(--border)" stroke-width="3"/>
+            <circle cx="21" cy="21" r="16" fill="none" stroke="${scoreColor}" stroke-width="3" stroke-dasharray="${dash} ${circumference}" stroke-linecap="round"/>
+          </svg>
+          <div class="resp-score-num" style="color:${scoreColor}">${score}%</div>
+        </div>
+      </div>
+      <div class="resp-answers">
+        ${(r.answers||[]).map((a,i)=>{
+          const q=s?.questions[i];
+          const status=a.status||'pending';
+          const icons={correct:'✓',wrong:'✗',partial:'~',pending:'?'};
+          const cls={correct:'ans-correct',wrong:'ans-wrong',partial:'ans-partial',pending:'ans-pending'};
+          return `<div class="resp-answer-item">
+            <div class="ans-indicator ${cls[status]}">${icons[status]}</div>
+            <div class="resp-answer-text"><strong>${esc(q?.text?.slice(0,40)||'Q'+(i+1))}...</strong><br>${esc(a.text||'No answer')}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcScore(r){
+  if(!r.answers||!r.answers.length)return 0;
+  const answered=r.answers.filter(a=>a.status);
+  if(!answered.length)return 0;
+  const points=answered.reduce((s,a)=>s+(a.status==='correct'?1:a.status==='partial'?0.5:0),0);
+  return Math.round((points/r.answers.length)*100);
+}
+
+function detectDivergences(resps, sid){
+  const results=[];
+  if(!sid&&resps.length) sid=resps[0]?.sessionId;
+  const s=state.sessions.find(s=>s.id===sid); if(!s)return results;
+  s.questions.forEach((q,qi)=>{
+    const answers=resps.map(r=>r.answers?.[qi]).filter(Boolean);
+    const statuses=answers.map(a=>a.status).filter(Boolean);
+    const correct=statuses.filter(s=>s==='correct').length;
+    const wrong=statuses.filter(s=>s==='wrong').length;
+    if(correct>0&&wrong>0){
+      results.push({question:q.text.slice(0,60),detail:`${correct} understood correctly, ${wrong} misunderstood. Review needed.`});
+    }
+  });
+  return results;
+}
+
+// ══════════════════════════════════════════
+//  BOTTLE VIEW
+// ══════════════════════════════════════════
+function renderBottle(){
+  const el=document.getElementById('bottle-content'); if(!el)return;
+  if(!state.sessions.length||!state.responses.length){
+    el.innerHTML=`<div class="empty"><div class="ei">⚗️</div><h3>Fill the bottle</h3><p>Understanding grows as your team completes their assessments</p></div>`;
+    return;
+  }
+  const totalMembers=state.members.length||1;
+  const latestSession=state.sessions.filter(s=>s.status==='sent').slice(-1)[0]||state.sessions.slice(-1)[0];
+  const sessionResps=state.responses.filter(r=>r.sessionId===latestSession?.id);
+  const avgScore=sessionResps.length?Math.round(sessionResps.reduce((s,r)=>s+calcScore(r),0)/sessionResps.length):0;
+  const fillClass=avgScore>=75?'high':avgScore>=40?'mid':'low';
+  const memberMap=state.members.map(m=>{
+    const resp=sessionResps.find(r=>r.memberToken===m.token);
+    const score=resp?calcScore(resp):null;
+    const status=!resp?'pending':score>=75?'clear':score>=40?'partial':'confused';
+    return {m,score,status};
+  });
+  el.innerHTML=`
+    <div class="bottle-visual">
+      <div class="bottle-label-row">
+        <div>
+          <div class="bottle-eyebrow">Team Comprehension · ${esc(latestSession?.name||'Latest Session')}</div>
+          <div class="bottle-score-big">${avgScore}<span>%</span></div>
+        </div>
+        <div style="font-size:2.5rem">⚗️</div>
+      </div>
+      <div class="fill-meter"><div class="fill-bar ${fillClass}" style="width:${avgScore}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--fog);font-family:'Courier Prime',monospace;margin-bottom:20px">
+        <span>${sessionResps.length} of ${totalMembers} responded</span>
+        <span>${memberMap.filter(x=>x.status==='clear').length} understood · ${memberMap.filter(x=>x.status==='confused').length} confused</span>
+      </div>
+      <div class="understanding-map">
+        ${memberMap.map(({m,score,status})=>{
+          const icons={clear:'✓',confused:'✗',partial:'~',pending:'·'};
+          return `<div class="um-cell ${status}">
+            <div class="um-name">${esc(m.name.split(' ')[0])}</div>
+            <div class="um-icon">${icons[status]}</div>
+            ${score!==null?`<div style="font-family:'Courier Prime',monospace;font-size:0.62rem;color:var(--fog2);margin-top:2px">${score}%</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    ${latestSession?.keyDecisions?.length?`
+    <div style="background:var(--paper2);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:16px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:0.95rem;margin-bottom:12px;color:var(--ink)">Key Decisions from This Session</div>
+      ${latestSession.keyDecisions.map(d=>`<div style="display:flex;gap:10px;margin-bottom:8px;font-size:0.82rem;color:var(--fog);line-height:1.5"><span style="color:var(--gold);flex-shrink:0">→</span>${esc(d)}</div>`).join('')}
+    </div>`:''}
+  `;
+}
+
+// ══════════════════════════════════════════
+//  MEMBER VIEW
+// ══════════════════════════════════════════
+async function loadMemberView(token){
+  showScreen('member');
+  document.getElementById('member-body').innerHTML=`<div class="empty" style="margin-top:80px"><div class="ei">⏳</div><h3>Loading your dashboard...</h3><p>Fetching latest sessions from the server</p></div>`;
+  await loadState();
+  const m=state.members.find(m=>m.token===token);
+  if(!m){ toast('Member not found. Ask your admin for the correct link.','err');
+    document.getElementById('member-body').innerHTML=`<div class="empty" style="margin-top:80px"><div class="ei">🔗</div><h3>No member found</h3><p>Use the link your admin shared with you</p></div>`;
+    return; }
+  document.getElementById('member-nav-name').textContent=m.name.split(' ')[0];
+  renderMemberDashboard(m);
+}
+
+function renderMemberDashboard(member){
+  const liveSessions=state.sessions.filter(s=>s.status==='sent'||s.status==='complete');
+  const myResponses=state.responses.filter(r=>r.memberToken===member.token);
+  const col=COLORS[state.members.indexOf(member)%COLORS.length]||COLORS[0];
+  const init=member.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  const latestSummary=liveSessions.slice(-1)[0]?.liveSummary||'No active session yet. Check back after your next meeting.';
+  const overallScore=myResponses.length?Math.round(myResponses.reduce((s,r)=>s+calcScore(r),0)/myResponses.length):null;
+
+  let html=`
+    <div class="member-greeting-block">
+      <div class="member-big-av" style="background:${col}">${esc(init)}</div>
+      <div class="mbg-text">
+        <h2>${esc(member.name)}</h2>
+        <p>${esc(member.role||'Team Member')} · ${liveSessions.length} active session${liveSessions.length!==1?'s':''}</p>
+      </div>
+      ${overallScore!==null?`<div style="margin-left:auto;text-align:center"><div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:${overallScore>=75?'var(--sage)':overallScore>=40?'var(--gold)':'var(--ember)'}">${overallScore}%</div><div style="font-size:0.68rem;font-family:'Courier Prime',monospace;color:var(--fog)">YOUR SCORE</div></div>`:''}
+    </div>
+    <div class="live-summary">
+      <div class="ls-top"><div class="ls-dot"></div><span class="ls-label">Live Brief</span></div>
+      <div class="ls-text">${esc(latestSummary)}</div>
+    </div>`;
+
+  if(!liveSessions.length){
+    html+=`<div class="empty"><div class="ei">⏳</div><h3>No active sessions</h3><p>Your admin will send an assessment after the next meeting.</p></div>`;
+  } else {
+    liveSessions.forEach(session=>{
+      const existing=myResponses.find(r=>r.sessionId===session.id);
+      const isDone=!!existing;
+      const myScore=existing?calcScore(existing):null;
+      html+=`<div style="margin-bottom:32px">
+        <div class="assessment-header">
+          <div class="assessment-title">${esc(session.name)}</div>
+          ${myScore!==null?`<span class="my-score-pill" style="background:${myScore>=75?'rgba(74,103,65,0.1)':myScore>=40?'rgba(201,168,76,0.1)':'rgba(192,82,42,0.1)'};color:${myScore>=75?'var(--sage)':myScore>=40?'var(--gold)':'var(--ember)'};border:1px solid ${myScore>=75?'rgba(74,103,65,0.2)':myScore>=40?'rgba(201,168,76,0.2)':'rgba(192,82,42,0.2)'}">${myScore}% scored</span>`:'<span class="chip chip-pending">Pending</span>'}
+        </div>`;
+
+      session.questions.forEach((q,qi)=>{
+        const myAns=existing?.answers?.[qi];
+        const cardClass=myAns?`answered-${myAns.status||'pending'}`:'';
+        html+=`<div class="mq-card ${cardClass}" id="qcard-${session.id}-${qi}">
+          <div class="mq-num-row">
+            <span class="mq-num">Q${qi+1}</span>
+            ${myAns?`<span class="mq-status">${myAns.status==='correct'?'✓ Correct':myAns.status==='partial'?'~ Partially correct':myAns.status==='wrong'?'✗ Review this':'Pending'}</span>`:''}
+          </div>
+          <div class="mq-question">${esc(q.text)}</div>`;
+
+        if(q.type==='mcq'&&q.options?.length){
+          html+=`<div class="mq-options">`;
+          q.options.forEach(opt=>{
+            const isSelected=myAns?.text===opt;
+            const isCorrect=isDone&&opt===q.correctOption;
+            const isWrong=isDone&&isSelected&&opt!==q.correctOption;
+            html+=`<label class="mq-option ${isSelected?'selected':''} ${isCorrect&&isDone?'correct':''} ${isWrong?'wrong':''}">
+              <input type="radio" name="q-${session.id}-${qi}" value="${esc(opt)}" ${isDone?'disabled':''} ${isSelected?'checked':''} onchange="selectOption('${session.id}',${qi},'${esc(opt)}')">
+              <div class="opt-dot"></div>${esc(opt)}
+            </label>`;
+          });
+          html+=`</div>`;
+        } else {
+          html+=`<textarea class="mq-open-input" id="ans-${session.id}-${qi}" placeholder="Type your answer here..." ${isDone?'disabled':''}>${esc(myAns?.text||'')}</textarea>`;
+        }
+
+        if(isDone&&myAns){
+          const fbClass=myAns.status==='correct'?'correct-fb':'wrong-fb';
+          html+=`<div class="mq-feedback on ${fbClass}">${myAns.status==='correct'?'✓ Great understanding!':myAns.status==='partial'?'~ Partially correct. ':'✗ Not quite. '} ${esc(q.correctAnswer||'')}</div>`;
+        }
+
+        // Ask a question
+        if(!isDone){
+          html+=`<div class="ask-q-area">
+            <textarea class="ask-q-input" id="askq-${session.id}-${qi}" placeholder="Confused about this? Ask a question..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button class="btn btn-ghost btn-sm" onclick="askQuestion('${session.id}',${qi},'${member.token}')">Ask ↗</button>
+          </div>`;
+        }
+
+        html+=`</div>`;
+      });
+
+      if(!isDone){
+        html+=`<div style="display:flex;justify-content:center;margin-top:18px">
+          <button class="btn btn-gold" onclick="submitAssessment('${session.id}','${member.token}')">Submit My Answers →</button>
+        </div>`;
+      }
+
+      // Revision sheet
+      if(isDone&&existing){
+        const wrongOrPartial=session.questions.filter((_,i)=>existing.answers?.[i]?.status==='wrong'||existing.answers?.[i]?.status==='partial');
+        if(wrongOrPartial.length){
+          html+=`<div class="revision-block">
+            <div class="rev-title">📖 Your Revision Sheet</div>
+            <div class="rev-sub">Review these before starting work — these are areas where your understanding differed from what was decided</div>
+            <div class="rev-items">
+              ${wrongOrPartial.map(q=>`<div class="rev-item needs-review">
+                <span class="rev-item-tag tag-review">Review</span>
+                <div class="rev-item-q">${esc(q.text)}</div>
+                <div class="rev-item-a">${esc(q.correctAnswer||'Speak to your team lead for clarification.')}</div>
+              </div>`).join('')}
+            </div>
+          </div>`;
+        } else {
+          html+=`<div class="revision-block">
+            <div class="rev-title">✓ Clear to Build</div>
+            <div class="rev-sub">You understood everything correctly from this session.</div>
+            <div class="rev-items">
+              ${session.questions.map(q=>`<div class="rev-item">
+                <span class="rev-item-tag tag-clear">Clear</span>
+                <div class="rev-item-q">${esc(q.text)}</div>
+                <div class="rev-item-a">${esc(q.correctAnswer||'—')}</div>
+              </div>`).join('')}
+            </div>
+          </div>`;
+        }
+      }
+
+      html+=`</div>`;
+    });
+  }
+
+  document.getElementById('member-body').innerHTML=html;
+}
+
+function selectOption(sid,qi,val){
+  // just visual — stored on submit
+}
+
+async function submitAssessment(sid,memberToken){
+  const session=state.sessions.find(s=>s.id===sid); if(!session)return;
+  const answers=[];
+  for(let i=0;i<session.questions.length;i++){
+    const q=session.questions[i];
+    let text='';
+    if(q.type==='mcq'){
+      const sel=document.querySelector(`input[name="q-${sid}-${i}"]:checked`);
+      text=sel?sel.value:'';
+    } else {
+      text=document.getElementById(`ans-${sid}-${i}`)?.value?.trim()||'';
+    }
+    answers.push({text,status:'pending',questionId:q.id});
+  }
+  if(answers.every(a=>!a.text)) return toast('Please answer at least one question','err');
+
+  toast('Evaluating your answers...','info');
+  try{
+    const evalPrompt=`Evaluate these assessment answers for a team meeting. Return only JSON with key "evaluations" — array of objects with {status: "correct"|"partial"|"wrong", feedback: "brief feedback"} for each answer in order.
+
+Be fair but accurate. "correct" means they clearly understood the key point. "partial" means they got some of it. "wrong" means they misunderstood or missed it entirely.
+
+Questions and answers:
+${session.questions.map((q,i)=>`Q${i+1}: ${q.text}\nExpected: ${q.correctAnswer||'(see question intent)'}\nAnswer given: ${answers[i]?.text||'(no answer)'}`).join('\n\n')}`;
+
+    const raw=await callAI(evalPrompt);
+    const data=JSON.parse(raw);
+    const evals=data.evaluations||[];
+    answers.forEach((a,i)=>{ a.status=evals[i]?.status||'pending'; a.feedback=evals[i]?.feedback||''; });
+
+    const existing=state.responses.findIndex(r=>r.sessionId===sid&&r.memberToken===memberToken);
+    const resp={id:genId(),sessionId:sid,memberToken,answers,submittedAt:new Date().toISOString()};
+    if(existing>=0){
+      state.responses[existing]=resp;
+      await dbUpdateResponse(resp);
+    } else {
+      state.responses.push(resp);
+      await dbSaveResponse(resp);
+    }
+    renderResponses(); renderBottle();
+    const member=state.members.find(m=>m.token===memberToken);
+    if(member) renderMemberDashboard(member);
+    toast('Assessment submitted!','ok');
+  }catch(e){
+    toast('Submission failed. Try again.','err'); console.error(e);
+  }
+}
+
+async function askQuestion(sid,qi,memberToken){
+  const question=state.sessions.find(s=>s.id===sid)?.questions[qi];
+  const askText=document.getElementById(`askq-${sid}-${qi}`)?.value?.trim();
+  if(!askText) return toast('Type your question first','err');
+  const el=document.getElementById(`askq-${sid}-${qi}`);
+  el.disabled=true; el.value='Getting answer...';
+  try{
+    const raw=await callAI(`A team member is confused about part of their meeting brief. Answer clearly and helpfully in 2-3 sentences.
+
+Original question from assessment: "${question?.text}"
+Expected understanding: "${question?.correctAnswer}"
+Team member asks: "${askText}"
+
+Answer their question directly.`);
+    el.value=''; el.disabled=false;
+    // Insert answer inline
+    const parent=el.closest('.ask-q-area');
+    const ansDiv=document.createElement('div');
+    ansDiv.style.cssText='margin-top:10px;padding:10px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px;font-size:0.8rem;color:var(--ink);line-height:1.5;';
+    ansDiv.textContent='💡 '+raw.replace(/```/g,'').trim();
+    parent.parentNode.insertBefore(ansDiv,parent.nextSibling);
+    toast('Answer ready','ok');
+  }catch(e){
+    el.disabled=false; el.value=''; toast('Could not get answer','err');
+  }
+}
+
+// ══════════════════════════════════════════
+//  AI
+// ══════════════════════════════════════════
+async function callAI(prompt){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': ANTHROPIC_KEY,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:2000,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  const d=await r.json();
+  if(!r.ok) throw new Error(d.error?.message||'API error');
+  return d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+}
+
+// ══════════════════════════════════════════
+//  MODAL / UI
+// ══════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className=`toast ${type==='ok'?'ok':type==='err'?'err':'info'}`;
+  const i={ok:'✓',err:'✗',info:'ℹ'};
+  t.innerHTML=`<span>${i[type]||'ℹ'}</span>${esc(msg)}`;
+  c.appendChild(t); setTimeout(()=>t.remove(),4300);
+}
+
+// init
+(async()=>{
+  const p=new URLSearchParams(window.location.search);
+  if(p.get('member')){ await loadMemberView(p.get('member')); return; }
+  // pre-load in background so admin panel is fast when opened
+  loadState().then(()=>{ populateSessionFilter(); renderTeamGrid(); });
+})();
+</script>
+</body>
+</html>
